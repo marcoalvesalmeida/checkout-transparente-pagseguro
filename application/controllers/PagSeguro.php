@@ -3,6 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class PagSeguro extends CI_Controller {
 
+    public function index(){
+        return $this->load->view('PagSeguro/index');
+    }
+
 	public function session()
 	{
 		$url = "https://ws.sandbox.pagseguro.uol.com.br/v2/sessions?email=seuemail&token=seutoken";
