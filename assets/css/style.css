@@ -3,3 +3,4 @@
 .credit-card, .debit , .billet{float:left; width: 30%; margin: 30px 1.5%; border-radius: 10px; border: 1px solid #999; font-size: 18px; font-weight: bold;}
 .title{float:left; width: 100%; border-radius: 10px 10px 0 0; font-weight: bold; color: #fff; background: #000; text-align: center;}
 #card-aceptable{padding-top: 100px;}
+.hide{display: none;}

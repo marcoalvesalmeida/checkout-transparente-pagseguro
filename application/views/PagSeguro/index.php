@@ -13,7 +13,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <section id="data-card">      
             <form action="">
                 <label for="number-card">Insira o número do cartão:</label>
-                <input type="text" name="number-card" id="number-card"><br>
+                <input type="text" name="number-card" id="number-card">
+                <select name="qtd-parcels" id="qtd-parcels" class="hide">
+                    <option value="">Selecione</option>
+                </select>
+                <br>
                 <img src="" alt="" id="img-card">
             </form>
         </section>
@@ -36,6 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         src="https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js">
     </script>
     <script>
+        const amount = 100;
         // Inicia sessão 
         function session(){
             $.ajax({
@@ -60,7 +65,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function listMethodsPayments()
         {
             PagSeguroDirectPayment.getPaymentMethods({
-                amount: 0.01,
+                amount: amount,
                 success: function(data) {
                     $.each(data.paymentMethods.CREDIT_CARD.options, function(i, obj){
                         $('.credit-card').append("<div><img src=https://stc.pagseguro.uol.com.br/"+obj.images.SMALL.path+">"+obj.name+"</div>");
@@ -99,6 +104,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         //Enviar para o index a imagem da bandeira
                         var imgBrand = response.brand.name;
                         $('#img-card').attr('src',"https://stc.pagseguro.uol.com.br/public/img/payment-methods-flags/42x20/" + imgBrand + ".png");
+                        getParcels(imgBrand)
                     },
                     error: function (response) {                        
                         //Enviar para o index a mensagem de erro
@@ -108,6 +114,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 });
             }
         });
+
+        //Exibe a quantidade e valores das parcelas
+        function getParcels(brand)
+        {
+            PagSeguroDirectPayment.getInstallments({
+                amount: amount,
+                maxInstallmentNoInterest: 12,
+                brand: brand,
+                success: function(response)
+                {
+                    $.each(response.installments,function(i,obj){
+                        $.each(obj,function(i2,obj2){
+                            var numberValue = obj2.installmentAmount;
+                            var number = "R$ "+ numberValue.toFixed(2).replace(".",",");
+                            $('#qtd-parcels').show().append("<option value='"+number+"'>"+obj2.quantity+" parcelas de "+number+"</option>");
+                        });
+                    });
+                },
+                error: function (response) {   
+                    Swal.fire('Error! Não é possível parcelar!');
+                }
+            });
+        }
 
 
     </script>
