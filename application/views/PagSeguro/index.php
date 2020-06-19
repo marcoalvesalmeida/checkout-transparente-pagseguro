@@ -14,6 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <form action="">
                 <label for="number-card">Insira o número do cartão:</label>
                 <input type="text" name="number-card" id="number-card">
+                <input type="text" name="token-card" id="token-card">
                 <select name="qtd-parcels" id="qtd-parcels" class="hide">
                     <option value="">Selecione</option>
                 </select>
@@ -104,7 +105,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         //Enviar para o index a imagem da bandeira
                         var imgBrand = response.brand.name;
                         $('#img-card').attr('src',"https://stc.pagseguro.uol.com.br/public/img/payment-methods-flags/42x20/" + imgBrand + ".png");
-                        getParcels(imgBrand)
+                        getParcels(imgBrand);
+                        getTokenCard(imgBrand);
                     },
                     error: function (response) {                        
                         //Enviar para o index a mensagem de erro
@@ -134,6 +136,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 },
                 error: function (response) {   
                     Swal.fire('Error! Não é possível parcelar!');
+                }
+            });
+        }
+
+        //Obter o token do cartão de crédito
+        function getTokenCard(brand)
+        {
+            PagSeguroDirectPayment.createCardToken({
+                cardNumber: '4111111111111111',
+                brand: brand,
+                cvv: '123',
+                expirationMonth: '12',
+                expirationYear: '2030',
+                success: function(response)
+                {
+                    console.log(response);
+                    $('#token-card').val(response.card.token);
                 }
             });
         }
