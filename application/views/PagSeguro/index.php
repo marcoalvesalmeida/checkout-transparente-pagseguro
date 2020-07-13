@@ -11,13 +11,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <h1>Exemplo Checkout PagSeguro</h1>
 
         <section id="data-card">      
-            <form action="">
+            <form action="" id="form">
                 <label for="number-card">Insira o número do cartão:</label>
                 <input type="text" name="number-card" id="number-card">
+                <input type="text" name="cvv-card" id="cvv-card">
+                <input type="text" name="expiration-month" id="expiration-month">
+                <input type="text" name="expiration-year" id="expiration-year">
                 <input type="text" name="token-card" id="token-card">
+                <input type="text" name="hash-card" id="hash-card">
                 <select name="qtd-parcels" id="qtd-parcels" class="hide">
                     <option value="">Selecione</option>
                 </select>
+                <input type="submit" value="Concluir">
                 <br>
                 <img src="" alt="" id="img-card">
             </form>
@@ -38,10 +43,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script type="text/javascript" 
-        src="https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js">
+        src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js">
     </script>
     <script>
         const amount = 100;
+        let brand_global = null;
         // Inicia sessão 
         function session(){
             $.ajax({
@@ -106,7 +112,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         var imgBrand = response.brand.name;
                         $('#img-card').attr('src',"https://stc.pagseguro.uol.com.br/public/img/payment-methods-flags/42x20/" + imgBrand + ".png");
                         getParcels(imgBrand);
-                        getTokenCard(imgBrand);
+                        brand_global = imgBrand;
                     },
                     error: function (response) {                        
                         //Enviar para o index a mensagem de erro
@@ -141,21 +147,42 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         //Obter o token do cartão de crédito
-        function getTokenCard(brand)
+        function getTokenCard()
         {
+            //4111111111111111
+            //123
+            //12
+            //2030
             PagSeguroDirectPayment.createCardToken({
-                cardNumber: '4111111111111111',
-                brand: brand,
-                cvv: '123',
-                expirationMonth: '12',
-                expirationYear: '2030',
+                cardNumber: $("#number-card").val(),
+                brand: brand_global,
+                cvv: $("#cvv-card").val(),
+                expirationMonth: $("#expiration-month").val(),
+                expirationYear: $("#expiration-year").val(),
                 success: function(response)
                 {
                     console.log(response);
                     $('#token-card').val(response.card.token);
+                },
+                error: function(response)
+                {
+                    console.log(response);
                 }
             });
         }
+
+        $("#form").on('submit',function(event){
+            event.preventDefault();
+            getTokenCard();
+            PagSeguroDirectPayment.onSenderHashReady(function(response){
+                $("#hash-card").val(response.senderHash);
+
+                if(response.status=='success'){
+                    //$("#form").trigger('submit');
+                    console.log("success");
+                }
+            });
+        });
 
 
     </script>
